@@ -1,6 +1,15 @@
-### Hexlet tests and linter status:
-[![Actions Status](https://github.com/Aallyycoop/frontend-project-11/workflows/hexlet-check/badge.svg)](https://github.com/Aallyycoop/frontend-project-11/actions)
+# 🚀 Welcome to your new awesome project!
 
-[![rss-reader](https://github.com/Aallyycoop/frontend-project-11/actions/workflows/rss-reader.yml/badge.svg)](https://github.com/Aallyycoop/frontend-project-11/actions/workflows/rss-reader.yml)
+This project has been created using **webpack-cli**, you can now run
 
-[![Maintainability](https://api.codeclimate.com/v1/badges/46bec3712ac959e879c0/maintainability)](https://codeclimate.com/github/Aallyycoop/frontend-project-11/maintainability)
+```
+npm run build
+```
+
+or
+
+```
+yarn build
+```
+
+to bundle your application
