@@ -56,9 +56,41 @@ const renderFeeds = (elements, i18nInstance, feeds) => {
   elements.feedsContainer.appendChild(listContainer);
 };
 
-// const renderPosts = (elements, i18nInstance, feeds) => {
+const renderPosts = (elements, i18nInstance, posts) => {
+  const container = document.createElement('div');
+  container.classList.add('card', 'border-0');
+  const divTitle = document.createElement('div');
+  divTitle.classList.add('card-body');
+  const title = document.createElement('h2');
+  title.classList.add('card-title', 'h4');
+  title.textContent = i18nInstance.t('posts');
 
-// };
+  const postContainer = document.createElement('ul');
+  postContainer.classList.add('list-group', 'border-0', 'rounded-0');
+
+  elements.postsContainer.innerHTML = '';
+
+  divTitle.appendChild(title);
+  container.appendChild(divTitle);
+
+  posts.forEach((post) => {
+    // console.log(post);
+    const cardPost = document.createElement('li');
+    cardPost.classList.add('list-group-item', 'border-0', 'border-end-0', 'd-flex', 'justify-content-between', 'align-items-start');
+    const link = document.createElement('a');
+    const button = document.createElement('button');
+
+    cardPost.append(link, button);
+    link.outerHTML = `<a href="${post.postLink}" class="fw-bold" data-id="" target="_blank" rel="noopener noreferrer">${post.postName}</a>`;
+    // console.log(post.postLink)
+    button.outerHTML = `<button type="button" class="btn btn-outline-primary btn-sm" data-id="" data-bs-toggle="modal" data-bs-target="#modal">${i18nInstance.t('button')}</button>`;
+    postContainer.appendChild(cardPost);
+    // console.log(postContainer);
+  });
+
+  elements.postsContainer.appendChild(container);
+  elements.postsContainer.appendChild(postContainer);
+};
 
 const renderError = (elements, i18nInstance, error) => {
   // elements.feedbackEl.classList.add('text-danger');
@@ -75,16 +107,20 @@ const renderError = (elements, i18nInstance, error) => {
       break;
     }
     case 'notOneOf': {
-      elements.feedbackEl.textContent = i18nInstance.t('validationErrors.notOneOf');
+      elements.feedbackEl.textContent = i18nInstance.t('errors.notOneOf');
       break;
     }
     case 'invalidRss': {
-      elements.feedbackEl.textContent = i18nInstance.t('parseError');
+      elements.feedbackEl.textContent = i18nInstance.t('errors.parseError');
+      break;
+    }
+    case 'network': {
+      elements.feedbackEl.textContent = i18nInstance.t('errors.network');
       break;
     }
     default:
   }
-  console.log(error);
+  // console.log(error);
 };
 
 const render = (elements, i18nInstance) => (path, value) => {
@@ -99,6 +135,11 @@ const render = (elements, i18nInstance) => (path, value) => {
     }
     case 'feeds': {
       renderFeeds(elements, i18nInstance, value);
+      // console.log(`смотрю3 ${value}`);
+      break;
+    }
+    case 'posts': {
+      renderPosts(elements, i18nInstance, value);
       // console.log(`смотрю3 ${value}`);
       break;
     }

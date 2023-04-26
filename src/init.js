@@ -33,7 +33,7 @@ export default async () => {
   const initialState = {
     form: {
       state: 'filling', // success/failed
-      error: null, // url/notOneOf/invalidRss
+      error: null, // url/notOneOf/invalidRss/network
     },
     feeds: [],
     posts: [],
@@ -61,6 +61,7 @@ export default async () => {
         // console.log(response);
         watchedState.form.state = 'success';
         watchedState.feeds.push({ ...feed, link: url, id: currentId });
+        watchedState.posts.push(...posts);
         // const postsWithId = posts.map((post) => ({ ...post, id: currentId }));
         // watchedState.posts.push(postsWithId);
         // console.log(watchedState);
@@ -68,11 +69,13 @@ export default async () => {
       .catch((error) => {
         if (error.name === 'ValidationError') {
           watchedState.form.error = error.type;
+        } else if (error.name === 'AxiosError') {
+          watchedState.form.error = 'network';
         } else {
           watchedState.form.error = 'invalidRss';
         }
         watchedState.form.state = 'failed';
-        // console.log(error.name);
+        console.log(error.name, error);
         // console.log(error.type);
       });
   });

@@ -17,7 +17,6 @@ export default (data) => {
     const postDescription = item.querySelector('description').textContent;
     return { postName, postLink, postDescription };
   });
-  console.log(posts);
 
   return { feed, posts };
 };
