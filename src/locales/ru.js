@@ -8,5 +8,7 @@ export default {
       url: 'Ссылка должна быть валидным URL',
       notOneOf: 'RSS уже существует',
     },
+    feeds: 'Фиды',
+    parseError: 'Ресурс не содержит валидный RSS',
   },
 };
