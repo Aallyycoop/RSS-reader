@@ -2,8 +2,14 @@ import 'bootstrap';
 import * as yup from 'yup';
 import onChange from 'on-change';
 import i18n from 'i18next';
+import axios from 'axios';
+import uniqueId from 'lodash/uniqueId.js';
 import render from './view.js';
 import ru from './locales/ru.js';
+import parser from './parser.js';
+// import { WatchIgnorePlugin } from 'webpack';
+
+const getUrl = (url) => `https://allorigins.hexlet.app/get?disableCache=true&url=${url}`;
 
 export default async () => {
   const defaultLanguage = 'ru';
@@ -20,12 +26,14 @@ export default async () => {
     formEl: document.querySelector('.rss-form'),
     inputEl: document.querySelector('.form-control'),
     feedbackEl: document.querySelector('.feedback'),
+    feedsContainer: document.querySelector('.feeds'),
+    postsContainer: document.querySelector('.posts'),
   };
 
   const initialState = {
     form: {
-      state: 'filling',
-      error: null,
+      state: 'filling', // success/failed
+      error: null, // url/notOneOf/invalidRss
     },
     feeds: [],
     posts: [],
@@ -37,20 +45,35 @@ export default async () => {
     e.preventDefault();
     const data = new FormData(e.target);
     const url = data.get('url');
+    const feedsLinks = watchedState.feeds.map(({ link }) => link);
     const schema = yup.string().trim().required().url()
-      .notOneOf(initialState.feeds);
-      // .notOneOf(initialState.feeds, i18nInstance.t('validationErrors.notOneOf'));
+      .notOneOf(feedsLinks);
 
-    // schema.validate('').then((data) => console.log(data)).catch((error) => console.log(error));
+    watchedState.form.error = null;
 
     schema.validate(url)
-      .then((urlData) => {
-        watchedState.feeds = [...watchedState.feeds, urlData];
+      .then((urlData) => axios.get(getUrl(urlData)))
+      .then((response) => {
+        const { feed, posts } = parser(response.data.contents);
+        // console.log({ feed, posts });
+        const currentId = uniqueId();
+        // console.log(parsedData);
+        // console.log(response);
+        watchedState.form.state = 'success';
+        watchedState.feeds.push({ ...feed, link: url, id: currentId });
+        // const postsWithId = posts.map((post) => ({ ...post, id: currentId }));
+        // watchedState.posts.push(postsWithId);
+        // console.log(watchedState);
       })
       .catch((error) => {
-        watchedState.form.error = [error];
-        // console.log([error]);
+        if (error.name === 'ValidationError') {
+          watchedState.form.error = error.type;
+        } else {
+          watchedState.form.error = 'invalidRss';
+        }
+        watchedState.form.state = 'failed';
+        // console.log(error.name);
+        // console.log(error.type);
       });
-    // console.log(watchedState);
   });
 };
