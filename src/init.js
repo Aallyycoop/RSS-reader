@@ -11,6 +11,20 @@ import parser from './parser.js';
 
 const getUrl = (url) => `https://allorigins.hexlet.app/get?disableCache=true&url=${url}`;
 
+const updateRss = (watchedState) => {
+  watchedState.feeds.map(({ link }) => axios.get(getUrl(link))
+    .then((response) => {
+      const { posts } = parser(response.data.contents);
+      const addedPosts = posts.map((post) => post.postLink);
+      const filtered = watchedState.posts.filter(((post) => addedPosts.includes(post.link)));
+      if (filtered.length === 0) {
+        watchedState.posts.push(...posts);
+      }
+    }));
+  setTimeout(() => updateRss(watchedState), 5000);
+  // console.log('check');
+};
+
 export default async () => {
   const defaultLanguage = 'ru';
   const i18nInstance = i18n.createInstance();
@@ -78,5 +92,6 @@ export default async () => {
         console.log(error.name, error);
         // console.log(error.type);
       });
+    updateRss(watchedState);
   });
 };
