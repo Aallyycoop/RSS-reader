@@ -103,7 +103,7 @@ const renderError = (elements, i18nInstance, error) => {
 //   }
   switch (error) {
     case 'url': {
-      elements.feedbackEl.textContent = i18nInstance.t('validationErrors.url');
+      elements.feedbackEl.textContent = i18nInstance.t('errors.url');
       break;
     }
     case 'notOneOf': {
