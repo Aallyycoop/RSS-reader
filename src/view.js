@@ -81,9 +81,9 @@ const renderPosts = (elements, i18nInstance, posts) => {
     const button = document.createElement('button');
 
     cardPost.append(link, button);
-    link.outerHTML = `<a href="${post.postLink}" class="fw-bold" data-id="" target="_blank" rel="noopener noreferrer">${post.postName}</a>`;
+    link.outerHTML = `<a href="${post.postLink}" class="fw-bold" data-id="${post.id}" target="_blank" rel="noopener noreferrer">${post.postName}</a>`;
     // console.log(post.postLink)
-    button.outerHTML = `<button type="button" class="btn btn-outline-primary btn-sm" data-id="" data-bs-toggle="modal" data-bs-target="#modal">${i18nInstance.t('button')}</button>`;
+    button.outerHTML = `<button type="button" class="btn btn-outline-primary btn-sm" data-id="${post.id}" data-bs-toggle="modal" data-bs-target="#modal">${i18nInstance.t('button')}</button>`;
     postContainer.appendChild(cardPost);
     // console.log(postContainer);
   });
@@ -93,14 +93,6 @@ const renderPosts = (elements, i18nInstance, posts) => {
 };
 
 const renderError = (elements, i18nInstance, error) => {
-  // elements.feedbackEl.classList.add('text-danger');
-  // elements.inputEl.classList.add('is-invalid');
-//   if (error === 'url') {
-//     elements.feedbackEl.textContent = i18nInstance.t('validationErrors.url');
-//   }
-//   if (error === 'notOneOf') {
-//     elements.feedbackEl.textContent = i18nInstance.t('validationErrors.notOneOf');
-//   }
   switch (error) {
     case 'url': {
       elements.feedbackEl.textContent = i18nInstance.t('errors.url');
@@ -123,7 +115,23 @@ const renderError = (elements, i18nInstance, error) => {
   // console.log(error);
 };
 
-const render = (elements, i18nInstance) => (path, value) => {
+const renderViewedPosts = (viewedPostsId) => {
+  viewedPostsId.forEach((postId) => {
+    const viewedPost = document.querySelector(`[data-id="${postId}"]`);
+    viewedPost.classList.remove('fw-bold');
+    viewedPost.classList.add('fw-normal', 'link-secondary');
+  });
+};
+
+const renderModalWindow = (elements, postID, watchedState) => {
+  const [currentPost] = watchedState.posts.filter((post) => post.id === postID);
+  console.log(currentPost);
+  elements.modalTitle.textContent = currentPost.postName;
+  elements.modalBody.textContent = currentPost.postDescription;
+  elements.modalLink.setAttribute('href', currentPost.postLink);
+};
+
+const render = (elements, i18nInstance, watchedState) => (path, value) => {
   switch (path) {
     case 'form.error': {
       renderError(elements, i18nInstance, value);
@@ -135,12 +143,18 @@ const render = (elements, i18nInstance) => (path, value) => {
     }
     case 'feeds': {
       renderFeeds(elements, i18nInstance, value);
-      // console.log(`смотрю3 ${value}`);
       break;
     }
     case 'posts': {
       renderPosts(elements, i18nInstance, value);
-      // console.log(`смотрю3 ${value}`);
+      break;
+    }
+    case 'uiState.posts': {
+      renderViewedPosts(value);
+      break;
+    }
+    case 'uiState.modal': {
+      renderModalWindow(elements, value, watchedState);
       break;
     }
     default:

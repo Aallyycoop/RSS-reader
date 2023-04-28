@@ -11,18 +11,29 @@ import parser from './parser.js';
 
 const getUrl = (url) => `https://allorigins.hexlet.app/get?disableCache=true&url=${url}`;
 
+// Реализуйте код, который раз в 5 секунд проверяет каждый RSS-поток,
+// и если он содержит новые посты, добавляет их в список.
+// Добавлять нужно только новые посты. Проверяться должны все добавленные RSS-потоки.
+
+// если добавятся новые посты, то произойдет рендерпостс, отображение уже просмотренных снимется?
+
 const updateRss = (watchedState) => {
   watchedState.feeds.map(({ link }) => axios.get(getUrl(link))
     .then((response) => {
       const { posts } = parser(response.data.contents);
       const addedPosts = posts.map((post) => post.postLink);
-      const filtered = watchedState.posts.filter(((post) => addedPosts.includes(post.link)));
+      const filtered = watchedState.posts.filter(((post) => addedPosts.includes(post.postLink)));
+      // console.log(filtered);
       if (filtered.length === 0) {
-        watchedState.posts.push(...posts);
+        posts.forEach((post) => {
+          const postId = post.postName;
+          watchedState.posts.push({ ...post, id: postId });
+        });
       }
+      // console.log(watchedState.posts);
     }));
   setTimeout(() => updateRss(watchedState), 5000);
-  // console.log('check');
+  console.log('check');
 };
 
 export default async () => {
@@ -42,6 +53,10 @@ export default async () => {
     feedbackEl: document.querySelector('.feedback'),
     feedsContainer: document.querySelector('.feeds'),
     postsContainer: document.querySelector('.posts'),
+    // modalButton: document.querySelector('.modal'),
+    modalTitle: document.querySelector('.modal-title'),
+    modalBody: document.querySelector('.modal-body'),
+    modalLink: document.querySelector('.modal-footer > .btn-primary'),
   };
 
   const initialState = {
@@ -51,9 +66,13 @@ export default async () => {
     },
     feeds: [],
     posts: [],
+    uiState: {
+      posts: [],
+      modal: null,
+    },
   };
 
-  const watchedState = onChange(initialState, render(elements, i18nInstance));
+  const watchedState = onChange(initialState, render(elements, i18nInstance, initialState));
 
   elements.formEl.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -71,14 +90,13 @@ export default async () => {
         const { feed, posts } = parser(response.data.contents);
         // console.log({ feed, posts });
         const currentId = uniqueId();
-        // console.log(parsedData);
-        // console.log(response);
         watchedState.form.state = 'success';
         watchedState.feeds.push({ ...feed, link: url, id: currentId });
-        watchedState.posts.push(...posts);
-        // const postsWithId = posts.map((post) => ({ ...post, id: currentId }));
-        // watchedState.posts.push(postsWithId);
-        // console.log(watchedState);
+        // console.log(watchedState.feeds);
+        posts.forEach((post) => {
+          const postId = post.postName;
+          watchedState.posts.push({ ...post, id: postId });
+        });
       })
       .catch((error) => {
         if (error.name === 'ValidationError') {
@@ -93,5 +111,20 @@ export default async () => {
         // console.log(error.type);
       });
     updateRss(watchedState);
+  });
+
+  elements.postsContainer.addEventListener('click', (e) => {
+    // console.log(e.target.tagName);
+    // console.log(e.target.dataset.id);
+    const viewedPostId = e.target.dataset.id;
+    if (viewedPostId) {
+      watchedState.uiState.posts.push(viewedPostId);
+      // console.log(watchedState.uiState.posts);
+    }
+
+    if (e.target.tagName === 'BUTTON') {
+      watchedState.uiState.modal = e.target.dataset.id;
+    }
+    // console.log(viewedPostId);
   });
 };
