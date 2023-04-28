@@ -7,9 +7,16 @@ import uniqueId from 'lodash/uniqueId.js';
 import render from './view.js';
 import ru from './locales/ru.js';
 import parser from './parser.js';
-// import { WatchIgnorePlugin } from 'webpack';
+import { add } from 'lodash';
 
 const getUrl = (url) => `https://allorigins.hexlet.app/get?disableCache=true&url=${url}`;
+
+const addPosts = (watchedState, posts) => {
+  posts.forEach((post) => {
+    const postId = post.postName;
+    watchedState.posts.push({ ...post, id: postId });
+  });
+};
 
 // Реализуйте код, который раз в 5 секунд проверяет каждый RSS-поток,
 // и если он содержит новые посты, добавляет их в список.
@@ -23,14 +30,9 @@ const updateRss = (watchedState) => {
       const { posts } = parser(response.data.contents);
       const addedPosts = posts.map((post) => post.postLink);
       const filtered = watchedState.posts.filter(((post) => addedPosts.includes(post.postLink)));
-      // console.log(filtered);
       if (filtered.length === 0) {
-        posts.forEach((post) => {
-          const postId = post.postName;
-          watchedState.posts.push({ ...post, id: postId });
-        });
+        addPosts(watchedState, posts);
       }
-      // console.log(watchedState.posts);
     }));
   setTimeout(() => updateRss(watchedState), 5000);
   console.log('check');
@@ -53,7 +55,6 @@ export default async () => {
     feedbackEl: document.querySelector('.feedback'),
     feedsContainer: document.querySelector('.feeds'),
     postsContainer: document.querySelector('.posts'),
-    // modalButton: document.querySelector('.modal'),
     modalTitle: document.querySelector('.modal-title'),
     modalBody: document.querySelector('.modal-body'),
     modalLink: document.querySelector('.modal-footer > .btn-primary'),
@@ -88,15 +89,10 @@ export default async () => {
       .then((urlData) => axios.get(getUrl(urlData)))
       .then((response) => {
         const { feed, posts } = parser(response.data.contents);
-        // console.log({ feed, posts });
         const currentId = uniqueId();
         watchedState.form.state = 'success';
         watchedState.feeds.push({ ...feed, link: url, id: currentId });
-        // console.log(watchedState.feeds);
-        posts.forEach((post) => {
-          const postId = post.postName;
-          watchedState.posts.push({ ...post, id: postId });
-        });
+        addPosts(watchedState, posts);
       })
       .catch((error) => {
         if (error.name === 'ValidationError') {
@@ -108,23 +104,18 @@ export default async () => {
         }
         watchedState.form.state = 'failed';
         console.log(error.name, error);
-        // console.log(error.type);
       });
     updateRss(watchedState);
   });
 
   elements.postsContainer.addEventListener('click', (e) => {
-    // console.log(e.target.tagName);
-    // console.log(e.target.dataset.id);
     const viewedPostId = e.target.dataset.id;
     if (viewedPostId) {
       watchedState.uiState.posts.push(viewedPostId);
-      // console.log(watchedState.uiState.posts);
     }
 
     if (e.target.tagName === 'BUTTON') {
       watchedState.uiState.modal = e.target.dataset.id;
     }
-    // console.log(viewedPostId);
   });
 };
