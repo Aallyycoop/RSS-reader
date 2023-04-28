@@ -35,7 +35,6 @@ const renderFeeds = (elements, i18nInstance, feeds) => {
   container.appendChild(divTitle);
 
   feeds.forEach((feed) => {
-    // console.log(feed);
     const cardFeed = document.createElement('li');
     cardFeed.classList.add('list-group-item', 'border-0', 'border-end-0');
 
@@ -49,7 +48,6 @@ const renderFeeds = (elements, i18nInstance, feeds) => {
 
     cardFeed.append(titleFeed, descriptionFeed);
     listContainer.appendChild(cardFeed);
-    // console.log(listContainer);
   });
 
   elements.feedsContainer.appendChild(container);
@@ -74,7 +72,6 @@ const renderPosts = (elements, i18nInstance, posts) => {
   container.appendChild(divTitle);
 
   posts.forEach((post) => {
-    // console.log(post);
     const cardPost = document.createElement('li');
     cardPost.classList.add('list-group-item', 'border-0', 'border-end-0', 'd-flex', 'justify-content-between', 'align-items-start');
     const link = document.createElement('a');
@@ -82,10 +79,8 @@ const renderPosts = (elements, i18nInstance, posts) => {
 
     cardPost.append(link, button);
     link.outerHTML = `<a href="${post.postLink}" class="fw-bold" data-id="${post.id}" target="_blank" rel="noopener noreferrer">${post.postName}</a>`;
-    // console.log(post.postLink)
     button.outerHTML = `<button type="button" class="btn btn-outline-primary btn-sm" data-id="${post.id}" data-bs-toggle="modal" data-bs-target="#modal">${i18nInstance.t('button')}</button>`;
     postContainer.appendChild(cardPost);
-    // console.log(postContainer);
   });
 
   elements.postsContainer.appendChild(container);
@@ -112,7 +107,6 @@ const renderError = (elements, i18nInstance, error) => {
     }
     default:
   }
-  // console.log(error);
 };
 
 const renderViewedPosts = (viewedPostsId) => {

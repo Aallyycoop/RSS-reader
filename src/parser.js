@@ -1,13 +1,11 @@
 export default (data) => {
   const parser = new DOMParser();
   const parsedData = parser.parseFromString(data, 'application/xml');
-  // console.log(parsedData);
 
   // парсинг фида
   const title = parsedData.querySelector('title').textContent;
   const description = parsedData.querySelector('description').textContent;
   const feed = { title, description };
-  // console.log(feed);
 
   // парсинг постов
   const items = parsedData.querySelectorAll('item');
