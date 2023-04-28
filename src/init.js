@@ -7,7 +7,6 @@ import uniqueId from 'lodash/uniqueId.js';
 import render from './view.js';
 import ru from './locales/ru.js';
 import parser from './parser.js';
-import { add } from 'lodash';
 
 const getUrl = (url) => `https://allorigins.hexlet.app/get?disableCache=true&url=${url}`;
 
