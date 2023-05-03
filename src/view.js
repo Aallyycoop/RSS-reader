@@ -1,3 +1,9 @@
+const setAttributes = (element, attributes) => {
+  Object.entries(attributes).forEach(([key, value]) => {
+    element.setAttribute(key, value);
+  });
+};
+
 const renderFormState = (elements, i18nInstance, value) => {
   switch (value) {
     case 'success':
@@ -5,12 +11,21 @@ const renderFormState = (elements, i18nInstance, value) => {
       elements.feedbackEl.classList.remove('text-danger');
       elements.feedbackEl.classList.add('text-success');
       elements.feedbackEl.textContent = i18nInstance.t('successValidation');
+      elements.button.disabled = false;
+      elements.inputEl.disabled = false;
       elements.formEl.reset();
       elements.inputEl.focus();
       break;
     case 'failed':
       elements.inputEl.classList.add('is-invalid');
       elements.feedbackEl.classList.add('text-danger');
+      elements.button.disabled = false;
+      elements.inputEl.disabled = false;
+      break;
+    case 'pending':
+      elements.button.disabled = true;
+      elements.inputEl.disabled = true;
+      elements.feedbackEl.textContent = '';
       break;
     default:
       throw new Error(`Unknown state: ${value}`);
@@ -54,7 +69,7 @@ const renderFeeds = (elements, i18nInstance, feeds) => {
   elements.feedsContainer.appendChild(listContainer);
 };
 
-const renderPosts = (elements, i18nInstance, posts) => {
+const renderPosts = (elements, i18nInstance, posts, watchedState) => {
   const container = document.createElement('div');
   container.classList.add('card', 'border-0');
   const divTitle = document.createElement('div');
@@ -78,8 +93,33 @@ const renderPosts = (elements, i18nInstance, posts) => {
     const button = document.createElement('button');
 
     cardPost.append(link, button);
-    link.outerHTML = `<a href="${post.postLink}" class="fw-bold" data-id="${post.id}" target="_blank" rel="noopener noreferrer">${post.postName}</a>`;
-    button.outerHTML = `<button type="button" class="btn btn-outline-primary btn-sm" data-id="${post.id}" data-bs-toggle="modal" data-bs-target="#modal">${i18nInstance.t('button')}</button>`;
+
+    if (watchedState.uiState.posts.includes(post.id)) {
+      link.classList.add('fw-normal', 'link-secondary');
+    } else {
+      link.classList.add('fw-bold');
+    }
+
+    setAttributes(link, {
+      href: post.postLink,
+      'data-id': post.id,
+      target: '_blank',
+      rel: 'noopener noreferrer',
+    });
+
+    link.textContent = post.postName;
+
+    button.classList.add('btn', 'btn-outline-primary', 'btn-sm');
+
+    setAttributes(button, {
+      type: 'button',
+      'data-id': post.id,
+      'data-bs-toggle': 'modal',
+      'data-bs-target': '#modal',
+    });
+
+    button.textContent = (i18nInstance.t('button'));
+
     postContainer.appendChild(cardPost);
   });
 
@@ -140,7 +180,7 @@ const render = (elements, i18nInstance, watchedState) => (path, value) => {
       break;
     }
     case 'posts': {
-      renderPosts(elements, i18nInstance, value);
+      renderPosts(elements, i18nInstance, value, watchedState);
       break;
     }
     case 'uiState.posts': {

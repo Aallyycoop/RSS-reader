@@ -34,7 +34,7 @@ const updateRss = (watchedState) => {
       }
     }));
   setTimeout(() => updateRss(watchedState), 5000);
-  console.log('check');
+  // console.log('check');
 };
 
 export default async () => {
@@ -51,6 +51,7 @@ export default async () => {
   const elements = {
     formEl: document.querySelector('.rss-form'),
     inputEl: document.querySelector('.form-control'),
+    button: document.querySelector('button[type="submit"]'),
     feedbackEl: document.querySelector('.feedback'),
     feedsContainer: document.querySelector('.feeds'),
     postsContainer: document.querySelector('.posts'),
@@ -82,7 +83,8 @@ export default async () => {
     const schema = yup.string().trim().required().url()
       .notOneOf(feedsLinks);
 
-    watchedState.form.error = null;
+    // watchedState.form.error = null;
+    watchedState.form.state = 'pending';
 
     schema.validate(url)
       .then((urlData) => axios.get(getUrl(urlData)))
