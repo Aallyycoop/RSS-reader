@@ -8,7 +8,12 @@ import render from './view.js';
 import ru from './locales/ru.js';
 import parser from './parser.js';
 
-const getUrl = (url) => `https://allorigins.hexlet.app/get?disableCache=true&url=${url}`;
+const addProxy = (url) => {
+  const urlWithProxy = new URL('https://allorigins.hexlet.app/get');
+  urlWithProxy.searchParams.set('url', url);
+  urlWithProxy.searchParams.set('disableCache', true);
+  console.log(urlWithProxy.toString());
+};
 
 const addPosts = (watchedState, posts) => {
   posts.forEach((post) => {
@@ -24,7 +29,7 @@ const addPosts = (watchedState, posts) => {
 // если добавятся новые посты, то произойдет рендерпостс, отображение уже просмотренных снимется?
 
 const updateRss = (watchedState) => {
-  watchedState.feeds.map(({ link }) => axios.get(getUrl(link))
+  watchedState.feeds.map(({ link }) => axios.get(addProxy(link))
     .then((response) => {
       const { posts } = parser(response.data.contents);
       const addedPosts = posts.map((post) => post.postLink);
@@ -87,7 +92,7 @@ export default async () => {
     watchedState.form.state = 'pending';
 
     schema.validate(url)
-      .then((urlData) => axios.get(getUrl(urlData)))
+      .then((urlData) => axios.get(addProxy(urlData)))
       .then((response) => {
         const { feed, posts } = parser(response.data.contents);
         const currentId = uniqueId();

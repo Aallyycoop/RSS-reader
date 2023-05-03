@@ -46,8 +46,7 @@ const renderFeeds = (elements, i18nInstance, feeds) => {
 
   elements.feedsContainer.innerHTML = '';
 
-  divTitle.appendChild(title);
-  container.appendChild(divTitle);
+  divTitle.appendChild(title, divTitle);
 
   feeds.forEach((feed) => {
     const cardFeed = document.createElement('li');
@@ -65,8 +64,7 @@ const renderFeeds = (elements, i18nInstance, feeds) => {
     listContainer.appendChild(cardFeed);
   });
 
-  elements.feedsContainer.appendChild(container);
-  elements.feedsContainer.appendChild(listContainer);
+  elements.feedsContainer.append(container, listContainer);
 };
 
 const renderPosts = (elements, i18nInstance, posts, watchedState) => {
