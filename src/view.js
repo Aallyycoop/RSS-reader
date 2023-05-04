@@ -125,31 +125,6 @@ const renderPosts = (elements, i18nInstance, posts, watchedState) => {
   elements.postsContainer.appendChild(postContainer);
 };
 
-// const renderError = (elements, i18nInstance, error) => {
-//   switch (error) {
-//     case 'url': {
-//       elements.feedbackEl.textContent = i18nInstance.t('errors.url');
-//       break;
-//     }
-//     case 'notOneOf': {
-//       elements.feedbackEl.textContent = i18nInstance.t('errors.notOneOf');
-//       break;
-//     }
-//     case 'parseError': {
-//       elements.feedbackEl.textContent = i18nInstance.t('errors.parseError');
-//       break;
-//     }
-//     case 'network': {
-//       elements.feedbackEl.textContent = i18nInstance.t('errors.network');
-//       break;
-//     }
-//     case 'unknownError': {
-//       throw new Error(`Unknown error ${error}`);
-//     }
-//     default:
-//   }
-// };
-
 const renderError = (elements, i18nInstance, error) => {
   if (error !== null) {
     elements.feedbackEl.textContent = i18nInstance.t(`errors.${error}`);
@@ -166,7 +141,6 @@ const renderViewedPosts = (viewedPostsId) => {
 
 const renderModalWindow = (elements, postID, watchedState) => {
   const [currentPost] = watchedState.posts.filter((post) => post.id === postID);
-  console.log(currentPost);
   elements.modalTitle.textContent = currentPost.name;
   elements.modalBody.textContent = currentPost.description;
   elements.modalLink.setAttribute('href', currentPost.link);

@@ -26,7 +26,6 @@ const updateRss = (watchedState) => {
   watchedState.feeds.map(({ link }) => axios.get(addProxy(link))
     .then((response) => {
       const { items } = parse(response.data.contents);
-      console.log(items);
       const addedPosts = items.map((post) => post.link);
       const filtered = watchedState.posts.filter(((post) => addedPosts.includes(post.link)));
       if (filtered.length === 0) {
@@ -34,7 +33,6 @@ const updateRss = (watchedState) => {
       }
     }));
   setTimeout(() => updateRss(watchedState), 5000);
-  console.log('check');
 };
 
 export default async () => {
@@ -62,7 +60,7 @@ export default async () => {
 
   const initialState = {
     form: {
-      state: 'filling', // success/failed
+      state: 'filling', // success/failed/pending
       error: null, // url/notOneOf/invalidRss/network
     },
     feeds: [],
@@ -83,7 +81,6 @@ export default async () => {
     const schema = yup.string().trim().required().url()
       .notOneOf(feedsLinks);
 
-    // watchedState.form.error = null;
     watchedState.form.state = 'pending';
 
     schema.validate(url)
@@ -96,12 +93,9 @@ export default async () => {
           title, description, link: url, id: currentId,
         });
         addPosts(watchedState, items);
-        console.log(watchedState.posts);
         watchedState.form.error = null;
       })
       .catch((error) => {
-        // console.log(error.message);
-        console.log(error);
         switch (error.name) {
           case 'ValidationError': {
             watchedState.form.error = error.type;
