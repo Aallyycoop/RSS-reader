@@ -13,6 +13,5 @@ export default {
     feeds: 'Фиды',
     posts: 'Посты',
     button: 'Просмотр',
-    parseError: 'Ресурс не содержит валидный RSS',
   },
 };

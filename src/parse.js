@@ -45,6 +45,6 @@ export default (data) => {
     const feed = { title, description, items };
     return feed;
   } catch (e) {
-    throw new Error('invalidRss');
+    throw new Error('parseError');
   }
 };
