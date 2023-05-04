@@ -6,7 +6,7 @@ import axios from 'axios';
 import uniqueId from 'lodash/uniqueId.js';
 import render from './view.js';
 import ru from './locales/ru.js';
-import parser from './parser.js';
+import parse from './parse.js';
 
 const addProxy = (url) => {
   const urlWithProxy = new URL('https://allorigins.hexlet.app/get');
@@ -15,9 +15,9 @@ const addProxy = (url) => {
   return urlWithProxy.toString();
 };
 
-const addPosts = (watchedState, posts) => {
-  posts.forEach((post) => {
-    const postId = post.postName;
+const addPosts = (watchedState, items) => {
+  items.forEach((post) => {
+    const postId = post.title;
     watchedState.posts.push({ ...post, id: postId });
   });
 };
@@ -25,12 +25,12 @@ const addPosts = (watchedState, posts) => {
 const updateRss = (watchedState) => {
   watchedState.feeds.map(({ link }) => axios.get(addProxy(link))
     .then((response) => {
-      const { posts } = parser(response.data.contents);
-      console.log(posts);
-      const addedPosts = posts.map((post) => post.postLink);
-      const filtered = watchedState.posts.filter(((post) => addedPosts.includes(post.postLink)));
+      const { items } = parse(response.data.contents);
+      console.log(items);
+      const addedPosts = items.map((post) => post.link);
+      const filtered = watchedState.posts.filter(((post) => addedPosts.includes(post.link)));
       if (filtered.length === 0) {
-        addPosts(watchedState, posts);
+        addPosts(watchedState, items);
       }
     }));
   setTimeout(() => updateRss(watchedState), 5000);
@@ -89,16 +89,19 @@ export default async () => {
     schema.validate(url)
       .then((urlData) => axios.get(addProxy(urlData)))
       .then((response) => {
-        const { feed, posts } = parser(response.data.contents);
+        const { title, description, items } = parse(response.data.contents);
         const currentId = uniqueId();
         watchedState.form.state = 'success';
-        watchedState.feeds.push({ ...feed, link: url, id: currentId });
-        addPosts(watchedState, posts);
+        watchedState.feeds.push({
+          title, description, link: url, id: currentId,
+        });
+        addPosts(watchedState, items);
+        console.log(watchedState.posts);
         watchedState.form.error = null;
       })
       .catch((error) => {
         // console.log(error.message);
-        // console.log(error);
+        console.log(error);
         switch (error.name) {
           case 'ValidationError': {
             watchedState.form.error = error.type;

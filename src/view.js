@@ -99,13 +99,13 @@ const renderPosts = (elements, i18nInstance, posts, watchedState) => {
     }
 
     setAttributes(link, {
-      href: post.postLink,
+      href: post.link,
       'data-id': post.id,
       target: '_blank',
       rel: 'noopener noreferrer',
     });
 
-    link.textContent = post.postName;
+    link.textContent = post.title;
 
     button.classList.add('btn', 'btn-outline-primary', 'btn-sm');
 
@@ -143,8 +143,10 @@ const renderError = (elements, i18nInstance, error) => {
       elements.feedbackEl.textContent = i18nInstance.t('errors.network');
       break;
     }
-    default:
+    case 'unknownError': {
       throw new Error(`Unknown error ${error}`);
+    }
+    default:
   }
 };
 
@@ -159,9 +161,9 @@ const renderViewedPosts = (viewedPostsId) => {
 const renderModalWindow = (elements, postID, watchedState) => {
   const [currentPost] = watchedState.posts.filter((post) => post.id === postID);
   console.log(currentPost);
-  elements.modalTitle.textContent = currentPost.postName;
-  elements.modalBody.textContent = currentPost.postDescription;
-  elements.modalLink.setAttribute('href', currentPost.postLink);
+  elements.modalTitle.textContent = currentPost.name;
+  elements.modalBody.textContent = currentPost.description;
+  elements.modalLink.setAttribute('href', currentPost.link);
 };
 
 const render = (elements, i18nInstance, watchedState) => (path, value) => {
