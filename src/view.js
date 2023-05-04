@@ -141,7 +141,7 @@ const renderViewedPosts = (viewedPostsId) => {
 
 const renderModalWindow = (elements, postID, watchedState) => {
   const [currentPost] = watchedState.posts.filter((post) => post.id === postID);
-  elements.modalTitle.textContent = currentPost.name;
+  elements.modalTitle.textContent = currentPost.title;
   elements.modalBody.textContent = currentPost.description;
   elements.modalLink.setAttribute('href', currentPost.link);
 };
