@@ -22,16 +22,11 @@ const addPosts = (watchedState, posts) => {
   });
 };
 
-// Реализуйте код, который раз в 5 секунд проверяет каждый RSS-поток,
-// и если он содержит новые посты, добавляет их в список.
-// Добавлять нужно только новые посты. Проверяться должны все добавленные RSS-потоки.
-
-// если добавятся новые посты, то произойдет рендерпостс, отображение уже просмотренных снимется?
-
 const updateRss = (watchedState) => {
   watchedState.feeds.map(({ link }) => axios.get(addProxy(link))
     .then((response) => {
       const { posts } = parser(response.data.contents);
+      console.log(posts);
       const addedPosts = posts.map((post) => post.postLink);
       const filtered = watchedState.posts.filter(((post) => addedPosts.includes(post.postLink)));
       if (filtered.length === 0) {
@@ -99,17 +94,28 @@ export default async () => {
         watchedState.form.state = 'success';
         watchedState.feeds.push({ ...feed, link: url, id: currentId });
         addPosts(watchedState, posts);
+        watchedState.form.error = null;
       })
       .catch((error) => {
-        if (error.name === 'ValidationError') {
-          watchedState.form.error = error.type;
-        } else if (error.name === 'AxiosError') {
-          watchedState.form.error = 'network';
-        } else {
-          watchedState.form.error = 'invalidRss';
+        // console.log(error.message);
+        // console.log(error);
+        switch (error.name) {
+          case 'ValidationError': {
+            watchedState.form.error = error.type;
+            break;
+          }
+          case 'AxiosError': {
+            watchedState.form.error = 'network';
+            break;
+          }
+          case 'Error': {
+            watchedState.form.error = error.message;
+            break;
+          }
+          default:
+            watchedState.form.error = 'unknownError';
         }
         watchedState.form.state = 'failed';
-        console.log(error.name, error);
       });
     updateRss(watchedState);
   });

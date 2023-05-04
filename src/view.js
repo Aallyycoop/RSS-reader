@@ -144,6 +144,7 @@ const renderError = (elements, i18nInstance, error) => {
       break;
     }
     default:
+      throw new Error(`Unknown error ${error}`);
   }
 };
 

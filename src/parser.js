@@ -1,6 +1,13 @@
 export default (data) => {
   const parser = new DOMParser();
   const parsedData = parser.parseFromString(data, 'application/xml');
+  // console.log(parsedData);
+
+  const error = parsedData.querySelector('parsererror');
+  if (error) {
+    const parsingError = new Error('invalidRss');
+    return parsingError;
+  }
 
   // парсинг фида
   const title = parsedData.querySelector('title').textContent;
