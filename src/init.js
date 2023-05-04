@@ -12,7 +12,7 @@ const addProxy = (url) => {
   const urlWithProxy = new URL('https://allorigins.hexlet.app/get');
   urlWithProxy.searchParams.set('url', url);
   urlWithProxy.searchParams.set('disableCache', true);
-  console.log(urlWithProxy.toString());
+  return urlWithProxy.toString();
 };
 
 const addPosts = (watchedState, posts) => {
@@ -39,7 +39,7 @@ const updateRss = (watchedState) => {
       }
     }));
   setTimeout(() => updateRss(watchedState), 5000);
-  // console.log('check');
+  console.log('check');
 };
 
 export default async () => {
