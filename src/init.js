@@ -3,7 +3,6 @@ import * as yup from 'yup';
 import onChange from 'on-change';
 import i18n from 'i18next';
 import axios from 'axios';
-import uniqueId from 'lodash/uniqueId.js';
 import render from './view.js';
 import ru from './locales/ru.js';
 import parse from './parse.js';
@@ -15,21 +14,22 @@ const addProxy = (url) => {
   return urlWithProxy.toString();
 };
 
-const addPosts = (watchedState, items) => {
+const addPosts = (watchedState, items, feedId) => {
   items.forEach((post) => {
     const postId = post.title;
-    watchedState.posts.push({ ...post, id: postId });
+    watchedState.posts.push({ ...post, feedId, id: postId });
   });
 };
 
 const updateRss = (watchedState) => {
   watchedState.feeds.map(({ link }) => axios.get(addProxy(link))
     .then((response) => {
-      const { items } = parse(response.data.contents);
-      const addedPosts = items.map((post) => post.link);
-      const filtered = watchedState.posts.filter(((post) => addedPosts.includes(post.link)));
-      if (filtered.length === 0) {
-        addPosts(watchedState, items);
+      const { feed, items } = parse(response.data.contents);
+      const feedId = feed.title;
+      const addedPosts = watchedState.posts.map((post) => post.link);
+      const filtered = items.filter(((post) => !addedPosts.includes(post.link)));
+      if (filtered.length !== 0) {
+        addPosts(watchedState, filtered, feedId);
       }
     }));
   setTimeout(() => updateRss(watchedState), 5000);
@@ -86,13 +86,11 @@ export default async () => {
     schema.validate(url)
       .then((urlData) => axios.get(addProxy(urlData)))
       .then((response) => {
-        const { title, description, items } = parse(response.data.contents);
-        const currentId = uniqueId();
+        const { feed, items } = parse(response.data.contents);
+        const feedId = feed.title;
         watchedState.form.state = 'success';
-        watchedState.feeds.push({
-          title, description, link: url, id: currentId,
-        });
-        addPosts(watchedState, items);
+        watchedState.feeds.push({ ...feed, link: url, id: feedId });
+        addPosts(watchedState, items, feedId);
         watchedState.form.error = null;
       })
       .catch((error) => {

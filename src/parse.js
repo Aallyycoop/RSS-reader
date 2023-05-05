@@ -7,6 +7,7 @@ export default (data) => {
     // парсинг фида
     const title = parsedData.querySelector('title').textContent;
     const description = parsedData.querySelector('description').textContent;
+    const feed = { title, description };
 
     // парсинг постов
     const posts = parsedData.querySelectorAll('item');
@@ -15,8 +16,7 @@ export default (data) => {
       link: item.querySelector('link').textContent,
       description: item.querySelector('description').textContent,
     }));
-    const feed = { title, description, items };
-    return feed;
+    return { feed, items };
   } catch (e) {
     throw new Error('parseError');
   }
