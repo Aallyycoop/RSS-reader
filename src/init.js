@@ -17,7 +17,7 @@ const addProxy = (url) => {
 const addPosts = (watchedState, items, feedId) => {
   items.forEach((post) => {
     const postId = post.title;
-    watchedState.posts.push({ ...post, feedId, id: postId });
+    watchedState.posts.unshift({ ...post, feedId, id: postId });
   });
 };
 
@@ -32,7 +32,8 @@ const updateRss = (watchedState) => {
         addPosts(watchedState, filtered, feedId);
       }
     }));
-  setTimeout(() => updateRss(watchedState), 5000);
+  const updateTime = 5000;
+  setTimeout(() => updateRss(watchedState), updateTime);
 };
 
 export default async () => {
@@ -81,39 +82,40 @@ export default async () => {
     const schema = yup.string().trim().required().url()
       .notOneOf(feedsLinks);
 
-    watchedState.form.state = 'pending';
+    watchedState.form = { ...watchedState.form, state: 'pending' };
 
     schema.validate(url)
       .then((urlData) => axios.get(addProxy(urlData)))
       .then((response) => {
         const { feed, items } = parse(response.data.contents);
         const feedId = feed.title;
-        watchedState.form.state = 'success';
+        watchedState.form = { ...watchedState.form, state: 'success' };
         watchedState.feeds.push({ ...feed, link: url, id: feedId });
         addPosts(watchedState, items, feedId);
-        watchedState.form.error = null;
+        watchedState.form = { ...watchedState.form, error: 'null' };
       })
       .catch((error) => {
         switch (error.name) {
           case 'ValidationError': {
-            watchedState.form.error = error.type;
+            watchedState.form = { ...watchedState.form, error: error.type };
             break;
           }
           case 'AxiosError': {
-            watchedState.form.error = 'network';
+            watchedState.form = { ...watchedState.form, error: 'network' };
             break;
           }
           case 'Error': {
-            watchedState.form.error = error.message;
+            watchedState.form = { ...watchedState.form, error: error.message };
             break;
           }
           default:
-            watchedState.form.error = 'unknownError';
+            watchedState.form = { ...watchedState.form, error: 'unknownError' };
         }
-        watchedState.form.state = 'failed';
+        watchedState.form = { ...watchedState.form, state: 'failed' };
       });
-    updateRss(watchedState);
   });
+
+  updateRss(watchedState);
 
   elements.postsContainer.addEventListener('click', (e) => {
     const viewedPostId = e.target.dataset.id;

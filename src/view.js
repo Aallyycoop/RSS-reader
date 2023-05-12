@@ -5,7 +5,7 @@ const setAttributes = (element, attributes) => {
 };
 
 const renderFormState = (elements, i18nInstance, value) => {
-  switch (value) {
+  switch (value.state) {
     case 'success':
       elements.inputEl.classList.remove('is-invalid');
       elements.feedbackEl.classList.remove('text-danger');
@@ -21,6 +21,7 @@ const renderFormState = (elements, i18nInstance, value) => {
       elements.feedbackEl.classList.add('text-danger');
       elements.button.disabled = false;
       elements.inputEl.disabled = false;
+      elements.feedbackEl.textContent = i18nInstance.t(`errors.${value.error}`);
       break;
     case 'pending':
       elements.button.disabled = true;
@@ -125,12 +126,6 @@ const renderPosts = (elements, i18nInstance, posts, watchedState) => {
   elements.postsContainer.appendChild(postContainer);
 };
 
-const renderError = (elements, i18nInstance, error) => {
-  if (error !== null) {
-    elements.feedbackEl.textContent = i18nInstance.t(`errors.${error}`);
-  }
-};
-
 const renderViewedPosts = (viewedPostsId) => {
   viewedPostsId.forEach((postId) => {
     const viewedPost = document.querySelector(`[data-id="${postId}"]`);
@@ -148,11 +143,7 @@ const renderModalWindow = (elements, postID, watchedState) => {
 
 const render = (elements, i18nInstance, watchedState) => (path, value) => {
   switch (path) {
-    case 'form.error': {
-      renderError(elements, i18nInstance, value);
-      break;
-    }
-    case 'form.state': {
+    case 'form': {
       renderFormState(elements, i18nInstance, value);
       break;
     }
