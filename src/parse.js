@@ -1,8 +1,8 @@
 export default (data) => {
   const parser = new DOMParser();
-
+  const parsedData = parser.parseFromString(data, 'application/xml');
   try {
-    const parsedData = parser.parseFromString(data, 'application/xml');
+    // const parsedData = parser.parseFromString(data, 'application/xml');
 
     // парсинг фида
     const title = parsedData.querySelector('title').textContent;
@@ -18,6 +18,8 @@ export default (data) => {
     }));
     return { feed, items };
   } catch (e) {
+    const error = parsedData.querySelector('parsererror');
+    error.isParsingError = true;
     throw new Error('parseError');
   }
 };
