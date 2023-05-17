@@ -4,8 +4,38 @@ const setAttributes = (element, attributes) => {
   });
 };
 
-const renderFormState = (elements, i18nInstance, value) => {
-  switch (value.state) {
+const handleForm = (elements, i18nInstance, value) => {
+  switch (value.status) {
+    case 'filling':
+      elements.button.disabled = false;
+      elements.inputEl.disabled = false;
+      break;
+    case 'failed':
+      elements.inputEl.classList.add('is-invalid');
+      elements.feedbackEl.classList.add('text-danger');
+      elements.button.disabled = false;
+      elements.inputEl.disabled = false;
+      elements.feedbackEl.textContent = i18nInstance.t(`errors.${value.error}`);
+      break;
+    default:
+      throw new Error(`Unknown status: ${value}`);
+  }
+};
+
+const handleLoadingProcessStatus = (elements, i18nInstance, value) => {
+  switch (value.status) {
+    case 'idle':
+      elements.button.disabled = false;
+      elements.inputEl.disabled = false;
+      elements.formEl.reset();
+      elements.inputEl.focus();
+      break;
+    case 'loading':
+      elements.button.disabled = true;
+      elements.inputEl.disabled = true;
+      elements.inputEl.classList.remove('is-invalid');
+      elements.feedbackEl.textContent = '';
+      break;
     case 'success':
       elements.inputEl.classList.remove('is-invalid');
       elements.feedbackEl.classList.remove('text-danger');
@@ -23,13 +53,8 @@ const renderFormState = (elements, i18nInstance, value) => {
       elements.inputEl.disabled = false;
       elements.feedbackEl.textContent = i18nInstance.t(`errors.${value.error}`);
       break;
-    case 'pending':
-      elements.button.disabled = true;
-      elements.inputEl.disabled = true;
-      elements.feedbackEl.textContent = '';
-      break;
     default:
-      throw new Error(`Unknown state: ${value}`);
+      throw new Error(`Unknown status: ${value}`);
   }
 };
 
@@ -144,7 +169,11 @@ const renderModalWindow = (elements, postID, watchedState) => {
 const render = (elements, i18nInstance, watchedState) => (path, value) => {
   switch (path) {
     case 'form': {
-      renderFormState(elements, i18nInstance, value);
+      handleForm(elements, i18nInstance, value);
+      break;
+    }
+    case 'loadingProcess': {
+      handleLoadingProcessStatus(elements, i18nInstance, value);
       break;
     }
     case 'feeds': {
