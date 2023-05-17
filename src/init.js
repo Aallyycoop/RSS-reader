@@ -14,6 +14,12 @@ const addProxy = (url) => {
   return urlWithProxy.toString();
 };
 
+const validate = (feedsLinks, url) => {
+  const schema = yup.string().trim().required().url()
+    .notOneOf(feedsLinks);
+  return schema.validate(url);
+};
+
 const addPosts = (watchedState, items, feedId) => {
   items.forEach((post) => {
     const postId = post.title;
@@ -22,7 +28,7 @@ const addPosts = (watchedState, items, feedId) => {
 };
 
 const updateRss = (watchedState) => {
-  watchedState.feeds.map(({ link }) => axios.get(addProxy(link))
+  const promises = watchedState.feeds.map(({ link }) => axios.get(addProxy(link))
     .then((response) => {
       const { feed, items } = parse(response.data.contents);
       const feedId = feed.title;
@@ -33,7 +39,7 @@ const updateRss = (watchedState) => {
       }
     }));
   const updateTime = 5000;
-  setTimeout(() => updateRss(watchedState), updateTime);
+  Promise.all(promises).then(setTimeout(() => updateRss(watchedState), updateTime));
 };
 
 export default async () => {
@@ -79,12 +85,9 @@ export default async () => {
     const data = new FormData(e.target);
     const url = data.get('url');
     const feedsLinks = watchedState.feeds.map(({ link }) => link);
-    const schema = yup.string().trim().required().url()
-      .notOneOf(feedsLinks);
-
     watchedState.form = { ...watchedState.form, state: 'pending' };
 
-    schema.validate(url)
+    validate(feedsLinks, url)
       .then((urlData) => axios.get(addProxy(urlData)))
       .then((response) => {
         const { feed, items } = parse(response.data.contents);
