@@ -67,8 +67,13 @@ export default async () => {
 
   const initialState = {
     form: {
-      state: 'filling', // success/failed/pending
-      error: null, // url/notOneOf/invalidRss/network
+      status: 'filling', // failed
+      // valid: true,
+      error: null, // url/notOneOf
+    },
+    loadingProcess: {
+      status: 'idle', // loading/success/failed
+      error: null, // invalidRss/network
     },
     feeds: [],
     posts: [],
@@ -85,36 +90,38 @@ export default async () => {
     const data = new FormData(e.target);
     const url = data.get('url');
     const feedsLinks = watchedState.feeds.map(({ link }) => link);
-    watchedState.form = { ...watchedState.form, state: 'pending' };
+
+    watchedState.form = { ...watchedState.form, status: 'filling' };
+    watchedState.loadingProcess = { ...watchedState.loadingProcess, status: 'loading' };
 
     validate(feedsLinks, url)
       .then((urlData) => axios.get(addProxy(urlData)))
       .then((response) => {
         const { feed, items } = parse(response.data.contents);
         const feedId = feed.title;
-        watchedState.form = { ...watchedState.form, state: 'success' };
         watchedState.feeds.push({ ...feed, link: url, id: feedId });
         addPosts(watchedState, items, feedId);
-        watchedState.form = { ...watchedState.form, error: 'null' };
+
+        watchedState.form = { ...watchedState.form, error: null };
+        watchedState.loadingProcess = { status: 'success', error: null };
       })
       .catch((error) => {
         switch (error.name) {
           case 'ValidationError': {
-            watchedState.form = { ...watchedState.form, error: error.type };
+            watchedState.form = { status: 'failed', error: error.type };
             break;
           }
           case 'AxiosError': {
-            watchedState.form = { ...watchedState.form, error: 'network' };
+            watchedState.loadingProcess = { status: 'failed', error: 'network' };
             break;
           }
           case 'Error': {
-            watchedState.form = { ...watchedState.form, error: error.message };
+            watchedState.loadingProcess = { status: 'failed', error: error.message };
             break;
           }
           default:
-            watchedState.form = { ...watchedState.form, error: 'unknownError' };
+            watchedState.loadingProcess = { status: 'failed', error: 'unknownError' };
         }
-        watchedState.form = { ...watchedState.form, state: 'failed' };
       });
   });
 
