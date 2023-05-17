@@ -4,6 +4,14 @@ const setAttributes = (element, attributes) => {
   });
 };
 
+const renderError = (elements, i18nInstance, value) => {
+  elements.inputEl.classList.add('is-invalid');
+  elements.feedbackEl.classList.add('text-danger');
+  elements.button.disabled = false;
+  elements.inputEl.disabled = false;
+  elements.feedbackEl.textContent = i18nInstance.t(`errors.${value.error}`);
+};
+
 const handleForm = (elements, i18nInstance, value) => {
   switch (value.status) {
     case 'filling':
@@ -11,11 +19,7 @@ const handleForm = (elements, i18nInstance, value) => {
       elements.inputEl.disabled = false;
       break;
     case 'failed':
-      elements.inputEl.classList.add('is-invalid');
-      elements.feedbackEl.classList.add('text-danger');
-      elements.button.disabled = false;
-      elements.inputEl.disabled = false;
-      elements.feedbackEl.textContent = i18nInstance.t(`errors.${value.error}`);
+      renderError(elements, i18nInstance, value);
       break;
     default:
       throw new Error(`Unknown status: ${value}`);
@@ -27,8 +31,6 @@ const handleLoadingProcessStatus = (elements, i18nInstance, value) => {
     case 'idle':
       elements.button.disabled = false;
       elements.inputEl.disabled = false;
-      elements.formEl.reset();
-      elements.inputEl.focus();
       break;
     case 'loading':
       elements.button.disabled = true;
@@ -47,11 +49,7 @@ const handleLoadingProcessStatus = (elements, i18nInstance, value) => {
       elements.inputEl.focus();
       break;
     case 'failed':
-      elements.inputEl.classList.add('is-invalid');
-      elements.feedbackEl.classList.add('text-danger');
-      elements.button.disabled = false;
-      elements.inputEl.disabled = false;
-      elements.feedbackEl.textContent = i18nInstance.t(`errors.${value.error}`);
+      renderError(elements, i18nInstance, value);
       break;
     default:
       throw new Error(`Unknown status: ${value}`);
