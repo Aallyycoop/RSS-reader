@@ -8,7 +8,8 @@ const renderError = (elements, i18nInstance, value) => {
   elements.inputEl.classList.add('is-invalid');
   elements.feedbackEl.classList.add('text-danger');
   elements.button.disabled = false;
-  elements.inputEl.disabled = false;
+  elements.inputEl.removeAttribute('readonly', 'readonly');
+  // elements.inputEl.disabled = false;
   elements.feedbackEl.textContent = i18nInstance.t(`errors.${value.error}`);
 };
 
@@ -16,7 +17,8 @@ const handleForm = (elements, i18nInstance, value) => {
   switch (value.status) {
     case 'process':
       elements.button.disabled = true;
-      elements.inputEl.disabled = true;
+      elements.inputEl.setAttribute('readonly', 'readonly');
+      // elements.inputEl.disabled = true;
       break;
     case 'failed':
       renderError(elements, i18nInstance, value);
@@ -30,7 +32,8 @@ const handleLoadingProcessStatus = (elements, i18nInstance, value) => {
   switch (value.status) {
     case 'idle':
       elements.button.disabled = false;
-      elements.inputEl.disabled = false;
+      elements.inputEl.removeAttribute('readonly', 'readonly');
+      // elements.inputEl.disabled = false;
       break;
     case 'loading':
       elements.inputEl.classList.remove('is-invalid');
@@ -42,7 +45,8 @@ const handleLoadingProcessStatus = (elements, i18nInstance, value) => {
       elements.feedbackEl.classList.add('text-success');
       elements.feedbackEl.textContent = i18nInstance.t('successValidation');
       elements.button.disabled = false;
-      elements.inputEl.disabled = false;
+      elements.inputEl.removeAttribute('readonly', 'readonly');
+      // elements.inputEl.disabled = false;
       elements.formEl.reset();
       elements.inputEl.focus();
       break;
