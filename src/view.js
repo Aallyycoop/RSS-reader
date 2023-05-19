@@ -14,9 +14,9 @@ const renderError = (elements, i18nInstance, value) => {
 
 const handleForm = (elements, i18nInstance, value) => {
   switch (value.status) {
-    case 'filling':
-      elements.button.disabled = false;
-      elements.inputEl.disabled = false;
+    case 'process':
+      elements.button.disabled = true;
+      elements.inputEl.disabled = true;
       break;
     case 'failed':
       renderError(elements, i18nInstance, value);
@@ -33,8 +33,6 @@ const handleLoadingProcessStatus = (elements, i18nInstance, value) => {
       elements.inputEl.disabled = false;
       break;
     case 'loading':
-      elements.button.disabled = true;
-      elements.inputEl.disabled = true;
       elements.inputEl.classList.remove('is-invalid');
       elements.feedbackEl.textContent = '';
       break;

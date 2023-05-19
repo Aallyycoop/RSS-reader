@@ -4,7 +4,7 @@ import onChange from 'on-change';
 import i18n from 'i18next';
 import axios from 'axios';
 import render from './view.js';
-import ru from './locales/ru.js';
+import resources from './locales/index.js';
 import parse from './parse.js';
 
 const addProxy = (url) => {
@@ -20,12 +20,11 @@ const validate = (feedsLinks, url) => {
   return schema.validate(url);
 };
 
-const addPosts = (watchedState, items, feedId) => {
-  items.forEach((post) => {
+const addId = (items, feedId) => items
+  .map((post) => {
     const postId = post.title;
-    watchedState.posts.unshift({ ...post, feedId, id: postId });
+    return { ...post, feedId, id: postId };
   });
-};
 
 const updateRss = (watchedState) => {
   const promises = watchedState.feeds.map(({ link }) => axios.get(addProxy(link))
@@ -35,11 +34,13 @@ const updateRss = (watchedState) => {
       const addedPosts = watchedState.posts.map((post) => post.link);
       const filtered = items.filter(((post) => !addedPosts.includes(post.link)));
       if (filtered.length !== 0) {
-        addPosts(watchedState, filtered, feedId);
+        const postsWithId = addId(filtered, feedId);
+        watchedState.posts.unshift(...postsWithId);
       }
-    }));
+    })
+    .catch(console.error));
   const updateTime = 5000;
-  Promise.all(promises).then(setTimeout(() => updateRss(watchedState), updateTime));
+  Promise.all(promises).finally(setTimeout(() => updateRss(watchedState), updateTime));
 };
 
 export default async () => {
@@ -48,9 +49,7 @@ export default async () => {
   await i18nInstance.init({
     lng: defaultLanguage,
     debug: false,
-    resources: {
-      ru,
-    },
+    resources,
   });
 
   const elements = {
@@ -67,8 +66,7 @@ export default async () => {
 
   const initialState = {
     form: {
-      status: 'filling', // failed
-      // valid: true,
+      status: 'filling', // process/failed
       error: null, // url/notOneOf
     },
     loadingProcess: {
@@ -87,12 +85,13 @@ export default async () => {
 
   elements.formEl.addEventListener('submit', (e) => {
     e.preventDefault();
+
+    watchedState.form = { ...watchedState.form, status: 'process' };
+    watchedState.loadingProcess = { ...watchedState.loadingProcess, status: 'loading' };
+
     const data = new FormData(e.target);
     const url = data.get('url');
     const feedsLinks = watchedState.feeds.map(({ link }) => link);
-
-    watchedState.form = { ...watchedState.form, status: 'filling' };
-    watchedState.loadingProcess = { ...watchedState.loadingProcess, status: 'loading' };
 
     validate(feedsLinks, url)
       .then((urlData) => axios.get(addProxy(urlData)))
@@ -100,12 +99,14 @@ export default async () => {
         const { feed, items } = parse(response.data.contents);
         const feedId = feed.title;
         watchedState.feeds.push({ ...feed, link: url, id: feedId });
-        addPosts(watchedState, items, feedId);
+        const postsWithId = addId(items, feedId);
+        watchedState.posts.unshift(...postsWithId);
 
         watchedState.form = { ...watchedState.form, error: null };
         watchedState.loadingProcess = { status: 'success', error: null };
       })
       .catch((error) => {
+        console.log(error);
         switch (error.name) {
           case 'ValidationError': {
             watchedState.form = { status: 'failed', error: error.type };
@@ -116,7 +117,9 @@ export default async () => {
             break;
           }
           case 'Error': {
-            watchedState.loadingProcess = { status: 'failed', error: error.message };
+            if (error.isParsingError) {
+              watchedState.loadingProcess = { status: 'failed', error: 'parseError' };
+            }
             break;
           }
           default:
