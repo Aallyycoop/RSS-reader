@@ -12,17 +12,14 @@
 ## Description:
 RSS-reader - is a service which helps to aggregate, show and auto-update unlimited number of RSS feeds.
 
-***
 ## System requirements:
 Node.js 19.3.0 or higher
 
-***
 ## Installation:
 
 ```
 git clone git@github.com:Aallyycoop/frontend-project-11.git
 ```
-
 ```
 make install
 ```
@@ -33,5 +30,4 @@ make develop
 make build
 ```
 ***
-
 [RSS-reader](https://frontend-project-11-gilt.vercel.app/)
