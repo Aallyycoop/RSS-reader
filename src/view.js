@@ -4,26 +4,7 @@ const setAttributes = (element, attributes) => {
   });
 };
 
-// const renderError = (elements, i18nInstance, value) => {
-//   elements.inputEl.classList.add('is-invalid');
-//   elements.feedbackEl.classList.add('text-danger');
-//   elements.button.disabled = false;
-//   elements.inputEl.removeAttribute('readonly', 'readonly');
-//   elements.feedbackEl.textContent = i18nInstance.t(`errors.${value.error}`);
-// };
-
 const handleForm = (elements, i18nInstance, value) => {
-  // switch (value.status) {
-  //   case 'process':
-  //     elements.button.disabled = true;
-  //     elements.inputEl.setAttribute('readonly', 'readonly');
-  //     break;
-  //   case 'failed':
-  //     renderError(elements, i18nInstance, value);
-  //     break;
-  //   default:
-  //     throw new Error(`Unknown status: ${value}`);
-  // }
   switch (value) {
     case 'success':
       elements.inputEl.classList.remove('is-invalid');
@@ -41,11 +22,6 @@ const handleForm = (elements, i18nInstance, value) => {
       elements.button.disabled = false;
       elements.inputEl.removeAttribute('readonly', 'readonly');
       break;
-    // case 'pending':
-    //   elements.button.disabled = true;
-    //   elements.inputEl.disabled = true;
-    //   elements.feedbackEl.textContent = '';
-    //   break;
     default:
       throw new Error(`Unknown status: ${value}`);
   }
@@ -63,19 +39,6 @@ const handleLoadingProcessStatus = (elements, value) => {
       elements.inputEl.classList.remove('is-invalid');
       elements.feedbackEl.textContent = '';
       break;
-    // case 'success':
-    //   elements.inputEl.classList.remove('is-invalid');
-    //   elements.feedbackEl.classList.remove('text-danger');
-    //   elements.feedbackEl.classList.add('text-success');
-    //   elements.feedbackEl.textContent = i18nInstance.t('successValidation');
-    //   elements.button.disabled = false;
-    //   elements.inputEl.removeAttribute('readonly', 'readonly');
-    //   elements.formEl.reset();
-    //   elements.inputEl.focus();
-    //   break;
-    // case 'failed':
-    //   renderError(elements, i18nInstance, value);
-    //   break;
     default:
       throw new Error(`Unknown status: ${value}`);
   }

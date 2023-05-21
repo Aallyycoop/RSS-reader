@@ -103,7 +103,6 @@ export default async () => {
         watchedState.form.status = 'success';
         watchedState.loadingProcess.status = 'idle';
         watchedState.form.error = null;
-        // watchedState.form.valid = true;
       })
       .catch((error) => {
         switch (error.name) {
