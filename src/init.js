@@ -1,4 +1,3 @@
-import 'bootstrap';
 import * as yup from 'yup';
 import onChange from 'on-change';
 import i18n from 'i18next';
@@ -66,11 +65,11 @@ export default async () => {
 
   const initialState = {
     form: {
-      status: 'filling', // process/failed
+      status: 'filling', // success/failed
       error: null, // url/notOneOf
     },
     loadingProcess: {
-      status: 'idle', // loading/success/failed
+      status: 'idle', // loading/
       error: null, // invalidRss/network
     },
     feeds: [],
@@ -86,8 +85,7 @@ export default async () => {
   elements.formEl.addEventListener('submit', (e) => {
     e.preventDefault();
 
-    watchedState.form = { ...watchedState.form, status: 'process' };
-    watchedState.loadingProcess = { ...watchedState.loadingProcess, status: 'loading' };
+    watchedState.loadingProcess.status = 'loading';
 
     const data = new FormData(e.target);
     const url = data.get('url');
@@ -102,29 +100,32 @@ export default async () => {
         const postsWithId = addId(items, feedId);
         watchedState.posts.unshift(...postsWithId);
 
-        watchedState.form = { ...watchedState.form, error: null };
-        watchedState.loadingProcess = { status: 'success', error: null };
+        watchedState.form.status = 'success';
+        watchedState.loadingProcess.status = 'idle';
+        watchedState.form.error = null;
+        // watchedState.form.valid = true;
       })
       .catch((error) => {
-        console.log(error);
         switch (error.name) {
           case 'ValidationError': {
-            watchedState.form = { status: 'failed', error: error.type };
+            watchedState.form.error = error.type;
             break;
           }
           case 'AxiosError': {
-            watchedState.loadingProcess = { status: 'failed', error: 'network' };
+            watchedState.form.error = 'network';
             break;
           }
           case 'Error': {
             if (error.isParsingError) {
-              watchedState.loadingProcess = { status: 'failed', error: 'parseError' };
+              watchedState.form.error = 'parseError';
             }
             break;
           }
           default:
-            watchedState.loadingProcess = { status: 'failed', error: 'unknownError' };
+            watchedState.form.error = 'unknownError';
         }
+        watchedState.form.status = 'failed';
+        watchedState.loadingProcess.status = 'idle';
       });
   });
 

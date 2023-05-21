@@ -4,41 +4,27 @@ const setAttributes = (element, attributes) => {
   });
 };
 
-const renderError = (elements, i18nInstance, value) => {
-  elements.inputEl.classList.add('is-invalid');
-  elements.feedbackEl.classList.add('text-danger');
-  elements.button.disabled = false;
-  elements.inputEl.removeAttribute('readonly', 'readonly');
-  // elements.inputEl.disabled = false;
-  elements.feedbackEl.textContent = i18nInstance.t(`errors.${value.error}`);
-};
+// const renderError = (elements, i18nInstance, value) => {
+//   elements.inputEl.classList.add('is-invalid');
+//   elements.feedbackEl.classList.add('text-danger');
+//   elements.button.disabled = false;
+//   elements.inputEl.removeAttribute('readonly', 'readonly');
+//   elements.feedbackEl.textContent = i18nInstance.t(`errors.${value.error}`);
+// };
 
 const handleForm = (elements, i18nInstance, value) => {
-  switch (value.status) {
-    case 'process':
-      elements.button.disabled = true;
-      elements.inputEl.setAttribute('readonly', 'readonly');
-      // elements.inputEl.disabled = true;
-      break;
-    case 'failed':
-      renderError(elements, i18nInstance, value);
-      break;
-    default:
-      throw new Error(`Unknown status: ${value}`);
-  }
-};
-
-const handleLoadingProcessStatus = (elements, i18nInstance, value) => {
-  switch (value.status) {
-    case 'idle':
-      elements.button.disabled = false;
-      elements.inputEl.removeAttribute('readonly', 'readonly');
-      // elements.inputEl.disabled = false;
-      break;
-    case 'loading':
-      elements.inputEl.classList.remove('is-invalid');
-      elements.feedbackEl.textContent = '';
-      break;
+  // switch (value.status) {
+  //   case 'process':
+  //     elements.button.disabled = true;
+  //     elements.inputEl.setAttribute('readonly', 'readonly');
+  //     break;
+  //   case 'failed':
+  //     renderError(elements, i18nInstance, value);
+  //     break;
+  //   default:
+  //     throw new Error(`Unknown status: ${value}`);
+  // }
+  switch (value) {
     case 'success':
       elements.inputEl.classList.remove('is-invalid');
       elements.feedbackEl.classList.remove('text-danger');
@@ -46,13 +32,50 @@ const handleLoadingProcessStatus = (elements, i18nInstance, value) => {
       elements.feedbackEl.textContent = i18nInstance.t('successValidation');
       elements.button.disabled = false;
       elements.inputEl.removeAttribute('readonly', 'readonly');
-      // elements.inputEl.disabled = false;
       elements.formEl.reset();
       elements.inputEl.focus();
       break;
     case 'failed':
-      renderError(elements, i18nInstance, value);
+      elements.inputEl.classList.add('is-invalid');
+      elements.feedbackEl.classList.add('text-danger');
+      elements.button.disabled = false;
+      elements.inputEl.removeAttribute('readonly', 'readonly');
       break;
+    // case 'pending':
+    //   elements.button.disabled = true;
+    //   elements.inputEl.disabled = true;
+    //   elements.feedbackEl.textContent = '';
+    //   break;
+    default:
+      throw new Error(`Unknown status: ${value}`);
+  }
+};
+
+const handleLoadingProcessStatus = (elements, value) => {
+  switch (value) {
+    case 'idle':
+      elements.button.disabled = false;
+      elements.inputEl.removeAttribute('readonly', 'readonly');
+      break;
+    case 'loading':
+      elements.button.disabled = true;
+      elements.inputEl.setAttribute('readonly', 'readonly');
+      elements.inputEl.classList.remove('is-invalid');
+      elements.feedbackEl.textContent = '';
+      break;
+    // case 'success':
+    //   elements.inputEl.classList.remove('is-invalid');
+    //   elements.feedbackEl.classList.remove('text-danger');
+    //   elements.feedbackEl.classList.add('text-success');
+    //   elements.feedbackEl.textContent = i18nInstance.t('successValidation');
+    //   elements.button.disabled = false;
+    //   elements.inputEl.removeAttribute('readonly', 'readonly');
+    //   elements.formEl.reset();
+    //   elements.inputEl.focus();
+    //   break;
+    // case 'failed':
+    //   renderError(elements, i18nInstance, value);
+    //   break;
     default:
       throw new Error(`Unknown status: ${value}`);
   }
@@ -151,6 +174,33 @@ const renderPosts = (elements, i18nInstance, posts, watchedState) => {
   elements.postsContainer.appendChild(postContainer);
 };
 
+const renderError = (elements, i18nInstance, error) => {
+  switch (error) {
+    case 'url': {
+      elements.feedbackEl.textContent = i18nInstance.t('errors.url');
+      break;
+    }
+    case 'notOneOf': {
+      elements.feedbackEl.textContent = i18nInstance.t('errors.notOneOf');
+      break;
+    }
+    case 'parseError': {
+      elements.feedbackEl.textContent = i18nInstance.t('errors.parseError');
+      break;
+    }
+    case 'network': {
+      elements.feedbackEl.textContent = i18nInstance.t('errors.network');
+      break;
+    }
+    case null: {
+      break;
+    }
+
+    default:
+      throw new Error(`Unknown error ${error}`);
+  }
+};
+
 const renderViewedPosts = (viewedPostsId) => {
   viewedPostsId.forEach((postId) => {
     const viewedPost = document.querySelector(`[data-id="${postId}"]`);
@@ -168,12 +218,17 @@ const renderModalWindow = (elements, postID, watchedState) => {
 
 const render = (elements, i18nInstance, watchedState) => (path, value) => {
   switch (path) {
-    case 'form': {
+    case 'form.status': {
       handleForm(elements, i18nInstance, value);
       break;
     }
-    case 'loadingProcess': {
-      handleLoadingProcessStatus(elements, i18nInstance, value);
+    case 'loadingProcess.status': {
+      handleLoadingProcessStatus(elements, value);
+      break;
+    }
+    case 'form.error':
+    case 'loadingProcess.error': {
+      renderError(elements, i18nInstance, value);
       break;
     }
     case 'feeds': {
