@@ -70,7 +70,7 @@ export default async () => {
     },
     loadingProcess: {
       status: 'idle', // loading/
-      error: null, // invalidRss/network
+      error: null, // parseError/network
     },
     feeds: [],
     posts: [],
@@ -111,12 +111,12 @@ export default async () => {
             break;
           }
           case 'AxiosError': {
-            watchedState.form.error = 'network';
+            watchedState.loadingProcess.error = 'network';
             break;
           }
           case 'Error': {
             if (error.isParsingError) {
-              watchedState.form.error = 'parseError';
+              watchedState.loadingProcess.error = 'parseError';
             }
             break;
           }
@@ -132,8 +132,9 @@ export default async () => {
 
   elements.postsContainer.addEventListener('click', (e) => {
     const viewedPostId = e.target.dataset.id;
-    if (viewedPostId) {
+    if (!watchedState.uiState.posts.includes(viewedPostId)) {
       watchedState.uiState.posts.push(viewedPostId);
+      // console.log(watchedState.uiState.posts);
     }
 
     if (e.target.tagName === 'BUTTON') {
